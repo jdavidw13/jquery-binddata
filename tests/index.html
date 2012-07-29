@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <title>Binddata Jquery Plugin</title>
+        <link rel="stylesheet" href="qunit-1.9.0.css" />
+
+        <script src="qunit-1.9.0.js"></script>
+        <script src="jquery-1.7.2.min.js"></script>
+        <script src="../jquery.binddata.js"></script>
+
+    </head>
+    <body>
+        <script>
+            $(function() {
+                test('Data binding', function() {
+                    var data = {a1:{a2:'a1.a2'}, prop1:'radio1val2', checkbox1:true, select1:'val2'};
+                    $('form').binddata(data);
+                    equal($('[name="a1.a2"]').val(), 'a1.a2', 'expected value "a1.a2"');
+                    equal($('[name=prop1]:checked').val(), 'radio1val2', 'expected Radio1 Val2 to be selected');
+                    equal($('[name=checkbox1]').is(':checked'), true, 'expected checkbox1 to be checked');
+                    equal($('[name=select1]').val(), 'val2', 'expected val2 to be selected');
+
+                    $('[name="a1.a2"]').val('hello there').trigger('change');
+                    equal(data.a1.a2, 'hello there', 'expected data.a1.a2 to be changed to "hello there"');
+
+                    $('[value=radio1val1]').trigger('click');
+                    equal(data.prop1, 'radio1val1', 'expected data.prop1 to be changed to "radio1val1"');
+
+                    data = {prop1:'radio1val2'};
+                    $('form').binddata(data, {bindAll: false});
+                    $('[name="a1.a2"]').val('test').trigger('change');
+                    ok(!data.a1, 'expected data.a1 to not have been bound');
+                });
+
+                test('Set field elements', function() {
+                    var data = {a1:{a2:'value'}};
+                    $('form').binddata(data, {onlyGetOrSet: 'set'});
+                    equal($('[name="a1.a2"]').val(), 'value', 'expected form a1.a2 to be set to "value"');
+                    $('[name="a1.a2"]').val('hello there').trigger('change');
+                    equal(data.a1.a2, 'value', 'expected data.a1.a2 to not change');
+                });
+            });
+        </script>
+        <div id="qunit"></div><br/><br/>
+
+        <form id="myform">
+            <label for="text1">Text1</label>
+            <input type="text" name="a1.a2" id="text1" />
+            <br/>
+            <label for="text2">Text2</label>
+            <input type="text" name="a1.a3.a4" id="text2" />
+            <br/><br/>
+            <label for="radio1val1">Radio1 Val1</label>
+            <input type="radio" name="prop1" value="radio1val1" id="radio1val1" /><br/>
+            <label for="radio1val2">Radio1 Val2</label>
+            <input type="radio" name="prop1" value="radio1val2" id="radio1val2" /><br/>
+            <br/>
+            <label for="radio2val1">Radio2 Val1</label>
+            <input type="radio" name="radio2" value="val1" id="radio2val1" /><br/>
+            <label for="radio2val2">Radio2 Val2</label>
+            <input type="radio" name="radio2" value="val2" id="radio2val2" /><br/>
+            <br/>
+            <label for="checkbox1">Checkbox1</label>
+            <input type="checkbox" name="checkbox1" id="checkbox1" />
+            <br/>
+            <label for="select1">Select1</label>
+            <select name="select1" id="select1">
+                <option value="val1">val1</option>
+                <option value="val2">val2</option>
+            </select>
+        </form>
+    </body>
+</html>

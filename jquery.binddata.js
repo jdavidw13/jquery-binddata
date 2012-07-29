@@ -67,6 +67,12 @@
         console.log(propname + ' changed: '+value);
     };
 
+    var setFormFields = function($form, data) {
+        for (var prop in data) {
+            setFormField($form, prop, data[prop]);
+        }
+    };
+
     var setFormField = function($form, name, value) {
         var $el = $form.find('[name="'+name+'"]');
         var type = getElementType($el);
@@ -97,10 +103,17 @@
 
         var _this = this;
         var defaultProperties = {
-            bindAll: true
+            bindAll: true,
+            onlyGetOrSet: ''
         };
         $.extend(defaultProperties, properties);
         var data = getPropNamesAndValues(bean);
+
+        switch (defaultProperties.onlyGetOrSet) {
+            case 'set':
+                setFormFields(this, data);
+                return this;
+        }
 
         if (defaultProperties.bindAll === false) {
             for (var prop in data) {
