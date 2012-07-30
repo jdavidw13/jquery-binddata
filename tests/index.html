@@ -29,14 +29,48 @@
                     $('form').binddata(data, {bindAll: false});
                     $('[name="a1.a2"]').val('test').trigger('change');
                     ok(!data.a1, 'expected data.a1 to not have been bound');
+
+                    data = {};
+                    $('form').binddata(data);
+                    $('[name="a1.a2"]').val('hello there').trigger('change');
+                    $('[value=radio1val1]').trigger('click');
+                    equal(data.a1.a2, 'hello there', 'expected data.a1.a2 to be bound to "hello there"');
+                    equal(data.prop1, 'radio1val1', 'expected data.prop1 to be bound to "radio1val1"');
+
                 });
 
-                test('Set field elements', function() {
+                test('Get/Set field elements', function() {
                     var data = {a1:{a2:'value'}};
                     $('form').binddata(data, {onlyGetOrSet: 'set'});
                     equal($('[name="a1.a2"]').val(), 'value', 'expected form a1.a2 to be set to "value"');
                     $('[name="a1.a2"]').val('hello there').trigger('change');
                     equal(data.a1.a2, 'value', 'expected data.a1.a2 to not change');
+
+                    data = {};
+                    $('[name="a1.a2"]').val('test');
+                    $('[name="a1.a3.a4"]').val('test');
+                    $('[value=radio1val1]').trigger('click');
+                    $('[value=radio2val1]').trigger('click');
+                    $('[name=checkbox1]').prop('checked', true);
+                    $('[name=select1]').val('val1');
+                    $('form').binddata(data, {onlyGetOrSet: 'get'});
+                    equal(data.a1.a2, 'test', 'expected data.a1.a2 to be "test"');
+                    equal(data.a1.a3.a4, 'test', 'expected data.a1.a3.a4 to be "test"');
+                    equal(data.prop1, 'radio1val1', 'expected data.prop1 to be "radio1val1"');
+                    equal(data.radio2, 'radio2val1', 'expected data.radio2 to be "radio2val1"');
+                    equal(data.checkbox1, true, 'expected data.checkbox1 to be true');
+                    equal(data.select1, 'val1', 'expected data.select1 to be "val1"');
+                    $('[name="a1.a2"]').val('new val').trigger('change');
+                    equal(data.a1.a2, 'test', "didn't expect data.a1.a2 to be bound to the form");
+                });
+
+                test('Data transforms', function() {
+                    var data = {a1:{a2:'value'}};
+                    $('form').binddata(data, {transforms:[{name:/a1.a2/, getset: function() { return 'changed'; }}]});
+                    equal($('[name="a1.a2"]').val(), 'changed', 'expected transform to change a1.a2 value to "changed"');
+
+                    $('[name="a1.a2"]').val('hello there').trigger('change');
+                    equal(data.a1.a2, 'changed', 'expected transform to change data.a1.a2 value to "changed"');
                 });
             });
         </script>

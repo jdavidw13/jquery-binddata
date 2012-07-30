@@ -52,7 +52,7 @@
 
     var changeHandler = function() {
         var type = getElementType($(this));
-        var bean = $(this).data('bindData.bean');
+        var bean = $(this).data('bindData.data').bean;
         var propname = $(this).attr('name');
         var value = null;
         switch (type) {
@@ -67,9 +67,29 @@
         console.log(propname + ' changed: '+value);
     };
 
-    var setFormFields = function($form, data) {
+    var getTransformsForField = function(name, transforms) {
+        var ret = [];
+        $.each(transforms, function(index, transform) {
+            if (transform.name.test(name)) {
+                ret.push(transform.getset);
+            }
+        });
+        return ret;
+    };
+
+    var applyTransforms = function(type, value, transforms) {
+        var ret = value;
+        $.each(transforms, function(index, transform) {
+            ret = transform(type, ret);
+        });
+        return ret;
+    };
+
+    var setFormFields = function($form, data, transforms) {
         for (var prop in data) {
-            setFormField($form, prop, data[prop]);
+            var propTransforms = getTransformsForField(prop, transforms);
+            var value = applyTransforms('set', data[prop], propTransforms);
+            setFormField($form, prop, value);
         }
     };
 
@@ -104,37 +124,38 @@
         var _this = this;
         var defaultProperties = {
             bindAll: true,
-            onlyGetOrSet: ''
+            onlyGetOrSet: '',
+            transforms: []
         };
         $.extend(defaultProperties, properties);
         var data = getPropNamesAndValues(bean);
 
         switch (defaultProperties.onlyGetOrSet) {
             case 'set':
-                setFormFields(this, data);
+                setFormFields(this, data, defaultProperties.transforms);
                 return this;
         }
+
+        var elData = {bean: bean, transforms: defaultProperties.transforms};
 
         if (defaultProperties.bindAll === false) {
             for (var prop in data) {
                 var $el = this.find('[name="'+prop+'"]');
-                $el.data('bindData.bean', bean);
+                $el.data('bindData.data', elData);
                 $el.on('change', changeHandler);
-                setFormField(this, prop, data[prop]);
             }
+            setFormFields(this, data, elData.transforms);
         }
         else {
             var doBind = function(index, el) {
                 var $el = $(el);
                 var name = $el.attr('name');
-                $el.data('bindData.bean', bean);
+                $el.data('bindData.data', elData);
                 $el.on('change', changeHandler);
-                if (data != null && data[name] != null) {
-                    setFormField(_this, name, data[name]);
-                }
             };
             this.find('input').each(doBind);
             this.find('select').each(doBind);
+            setFormFields(this, data, elData.transforms);
         }
 
         return this;
