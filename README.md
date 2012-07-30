@@ -30,6 +30,49 @@ $('form').binddata(data);
 ```
 When the values in the text fields change, the data model will be updated accordingly.
 
+
+Binddata can be used to set or get the values from a form without binding change elements to them.
+```
+<form>
+<input type="text" name="text1" />
+<input type="text" name="text2" />
+</form>
+var data = {};
+$('form').binddata(data, {onlyGetOrSet: 'get'});
+// data will contain two properties, text1 and text2, with the values of those elements
+```
+```
+<form>
+<input type="text" name="text1" />
+<input type="text" name="text2" />
+</form>
+var data = {text1: 'hello', text2: 'there'};
+$('form').binddata(data, {onlyGetOrSet: 'set'});
+// the text field text1 will contain "hello" and text2 will contain "there"
+```
+
+
+Data transformers can be used to modify the value being set in the form, or the value retrieved into the model.
+```
+<form>
+<input type="text" name="prop" />
+</form>
+var data = {prop: 'getTest'};
+$('form').binddata(data, {transforms: [{
+    name: /prop/,
+    getset: function(type, value) {
+        if ('set' == type && value == 'getTest') {
+            return 'setTest';
+        }
+        if ('get' == type && value == 'setTest') {
+            return 'getTest';
+        }
+    }
+}]});
+// will result in prop being set to "setTest".  If the field is ever changed to "setTest" data.prop will be set to "getTest".
+
+```
+
 Options
 -------
 
