@@ -53,6 +53,7 @@
     var changeHandler = function() {
         var type = getElementType($(this));
         var bean = $(this).data('bindData.data').bean;
+        var transforms = $(this).data('bindData.data').transforms;
         var propname = $(this).attr('name');
         var value = null;
         switch (type) {
@@ -63,6 +64,7 @@
                 value = $(this).val();
                 break;
         }
+        value = applyTransforms('get', value, getTransformsForField(propname, transforms));
         setPropValue(bean, propname, value);
         console.log(propname + ' changed: '+value);
     };
@@ -91,6 +93,35 @@
             var value = applyTransforms('set', data[prop], propTransforms);
             setFormField($form, prop, value);
         }
+    };
+
+    var getFormFields = function($form, data, transforms) {
+        var getFieldData = function(index, el) {
+            var name = $(el).attr('name');
+            var type = getElementType($(el));
+            var val = null;
+            switch (type) {
+                case 'text':
+                case 'select':
+                    val = $(el).val();
+                    break;
+                case 'radio':
+                    if ($(el).is(':checked')) {
+                        val = $(el).val();
+                    }
+                    else {
+                        return;
+                    }
+                    break;
+                case 'checkbox':
+                    val = $(el).is(':checked');
+                    break;
+            }
+            val = applyTransforms('get', val, getTransformsForField(name, transforms));
+            setPropValue(data, name, val);
+        };
+        $form.find('input').each(getFieldData);
+        $form.find('select').each(getFieldData);
     };
 
     var setFormField = function($form, name, value) {
@@ -133,6 +164,9 @@
         switch (defaultProperties.onlyGetOrSet) {
             case 'set':
                 setFormFields(this, data, defaultProperties.transforms);
+                return this;
+            case 'get':
+                getFormFields(this, bean, defaultProperties.transforms);
                 return this;
         }
 
