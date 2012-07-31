@@ -101,6 +101,7 @@
             var type = getElementType($(el));
             var val = null;
             switch (type) {
+                case 'hidden':
                 case 'text':
                 case 'select':
                     val = $(el).val();
@@ -129,6 +130,7 @@
         var type = getElementType($el);
 
         switch (type) {
+            case 'hidden':
             case 'text':
             case 'select':
                 $el.val(value);
