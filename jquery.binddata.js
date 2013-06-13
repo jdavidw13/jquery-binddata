@@ -117,6 +117,9 @@
                 case 'checkbox':
                     val = $(el).is(':checked');
                     break;
+    			case 'textarea':
+	                val = $(el).val();
+	                break;
             }
             val = applyTransforms('get', val, getTransformsForField(name, transforms));
             setPropValue(data, name, val);
@@ -145,6 +148,9 @@
                 else {
                     $el.prop('checked', false);
                 }
+                break;
+			case 'textarea':
+                $el.val(value);
                 break;
         }
     };
