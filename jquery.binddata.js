@@ -66,6 +66,7 @@
         }
         value = applyTransforms('get', value, getTransformsForField(propname, transforms));
         setPropValue(bean, propname, value);
+        this.form.isDataChanged = true;
         console.log(propname + ' changed: '+value);
     };
 
@@ -103,6 +104,7 @@
             switch (type) {
                 case 'hidden':
                 case 'text':
+				case 'textarea':	
                 case 'select':
                     val = $(el).val();
                     break;
@@ -117,9 +119,6 @@
                 case 'checkbox':
                     val = $(el).is(':checked');
                     break;
-    			case 'textarea':
-	                val = $(el).val();
-	                break;
             }
             val = applyTransforms('get', val, getTransformsForField(name, transforms));
             setPropValue(data, name, val);
@@ -135,6 +134,7 @@
         switch (type) {
             case 'hidden':
             case 'text':
+			case 'textarea':
             case 'select':
                 $el.val(value);
                 break;
@@ -148,9 +148,6 @@
                 else {
                     $el.prop('checked', false);
                 }
-                break;
-			case 'textarea':
-                $el.val(value);
                 break;
         }
     };
@@ -168,6 +165,7 @@
         };
         $.extend(defaultProperties, properties);
         var data = getPropNamesAndValues(bean);
+        this[0].isDataChanged = false;
 
         switch (defaultProperties.onlyGetOrSet) {
             case 'set':
@@ -180,7 +178,7 @@
 
         var elData = {bean: bean, transforms: defaultProperties.transforms};
 
-        if (defaultProperties.bindAll === false) {
+        if (defaultProperties.bindAll === true) {
             for (var prop in data) {
                 var $el = this.find('[name="'+prop+'"]');
                 $el.data('bindData.data', elData);
