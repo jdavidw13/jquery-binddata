@@ -12,12 +12,23 @@
         <script>
             $(function() {
                 test('Data binding', function() {
-                    var data = {a1:{a2:'a1.a2'}, prop1:'radio1val2', checkbox1:true, select1:'val2'};
+                    var data = {
+                    		a1:{a2:'a1.a2'}, 
+                    		prop1:'radio1val2', 
+                    		checkbox1:true, 
+                    		select1:'val2',
+                    		birthdate: new Date('2012-10-21'),
+                    		birthTime: new Date('2012-10-12T16:44'),
+                    		combinedDateTime: new Date('2012-10-12T16:44')
+                    		};
                     $('form').binddata(data);
                     equal($('[name="a1.a2"]').val(), 'a1.a2', 'expected value "a1.a2"');
                     equal($('[name=prop1]:checked').val(), 'radio1val2', 'expected Radio1 Val2 to be selected');
                     equal($('[name=checkbox1]').is(':checked'), true, 'expected checkbox1 to be checked');
                     equal($('[name=select1]').val(), 'val2', 'expected val2 to be selected');
+                    equal($('#birthdate').val(), "2012-10-21", "Expected birthdate to be 2012-10-21");
+                    equal($('#birthtime').val(), "16:44:00.000", "Expected birthtime to be 16:44:00.000");
+                    equal($('#combined').val(), "2012-10-12T16:44:00.000", "Expected combined to be 2012-10-12T16:44:00.000");
 
                     $('[name="a1.a2"]').val('hello there').trigger('change');
                     equal(data.a1.a2, 'hello there', 'expected data.a1.a2 to be changed to "hello there"');
@@ -36,7 +47,6 @@
                     $('[value=radio1val1]').trigger('click');
                     equal(data.a1.a2, 'hello there', 'expected data.a1.a2 to be bound to "hello there"');
                     equal(data.prop1, 'radio1val1', 'expected data.prop1 to be bound to "radio1val1"');
-
                 });
 
                 test('Get/Set field elements', function() {
@@ -101,6 +111,17 @@
                 <option value="val1">val1</option>
                 <option value="val2">val2</option>
             </select>
+            <br/>
+            <br/>
+            <label for="birthdate">Birthdate</label>
+			<input id="birthdate" type="date" name="birthdate" />
+            <br/>
+			<label for="birthtime">Birth time</label>
+			<input id="birthtime" type="time" name="birthTime" />
+            <br/>
+			<label for="combined">Combined birth date and time</label>
+			<input id="combined" type="datetime-local" name="combinedDateTime" />
+            <br/>
         </form>
     </body>
 </html>
