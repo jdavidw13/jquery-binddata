@@ -29,7 +29,12 @@
             var propname = (propPrefix) ? propPrefix + '.' + prop : prop;
             var type = typeof(bean[prop]);
             if ('object' === type) {
-                ret = getPropNamesAndValues(bean[prop], propname, ret);
+            	if(bean[prop] instanceof Date) {
+            		ret[propname] = convertDateToStringIfNeeded(getPropValue(bean, prop));
+            	}
+            	else {
+            		ret = getPropNamesAndValues(bean[prop], propname, ret);
+            	}
             }
             else if ('function' === type) {
             }
@@ -94,6 +99,23 @@
             setFormField($form, prop, value);
         }
     };
+    
+    var trimTrailingZ = function(/* String */ data) {
+    	var lastChar = data.substring(data.length - 1, data.length); 
+    	if(lastChar == 'Z' || lastChar == 'z') {
+    		return data.substring(0, data.length - 1);
+    	}
+    	return data;
+    }
+    
+    var convertDateToStringIfNeeded = function(/* Date or String */ value) {
+		if(typeof value == 'object') {
+			if(value instanceof Date) {
+				value = value.toJSON();
+			}
+		}
+		return value;
+    }
 
     var getFormFields = function($form, data, transforms) {
         var getFieldData = function(index, el) {
@@ -120,6 +142,8 @@
     			case 'textarea':
 	                val = $(el).val();
 	                break;
+	            default:
+	            	val = $(el).val();
             }
             val = applyTransforms('get', val, getTransformsForField(name, transforms));
             setPropValue(data, name, val);
@@ -152,6 +176,29 @@
 			case 'textarea':
                 $el.val(value);
                 break;
+			case 'date':
+				var index = value.indexOf('T');
+				if(index >= 0) {
+					value = value.substring(0, index);
+				}
+				value = trimTrailingZ(value);
+                $el.val(value);
+				break;
+			case 'time':
+				var index = value.indexOf('T');
+				if(index >= 0) {
+					value = value.substring(index + 1);
+				}
+				value = trimTrailingZ(value);
+                $el.val(value);
+				break;
+			case 'datetime-local':
+				value = trimTrailingZ(value);
+                $el.val(value);
+				break;
+            default:
+                $el.val(value);
+            	
         }
     };
 
