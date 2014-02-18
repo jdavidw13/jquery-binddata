@@ -28,7 +28,7 @@
         for (var prop in bean) {
             var propname = (propPrefix) ? propPrefix + '.' + prop : prop;
             var type = typeof(bean[prop]);
-            if ('object' === type) {
+            if ('object' === type && bean[prop] !== null) {
             	if(bean[prop] instanceof Date) {
             		ret[propname] = convertDateToStringIfNeeded(getPropValue(bean, prop));
             	}
