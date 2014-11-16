@@ -13,14 +13,14 @@
             $(function() {
                 test('Data binding', function() {
                     var data = {
-                    		a1:{a2:'a1.a2'}, 
-                    		prop1:'radio1val2', 
-                    		checkbox1:true, 
-                    		select1:'val2',
-                    		birthdate: new Date('2012-10-21'),
-                    		birthTime: new Date('2012-10-12T16:44'),
-                    		combinedDateTime: new Date('2012-10-12T16:44')
-                    		};
+                        a1:{a2:'a1.a2'}, 
+                        prop1:'radio1val2', 
+                        checkbox1:true, 
+                        select1:'val2',
+                        birthdate: new Date('2012-10-21'),
+                        birthTime: new Date('2012-10-12T16:44'),
+                        combinedDateTime: new Date('2012-10-12T16:44')
+                    };
                     $('form').binddata(data);
                     equal($('[name="a1.a2"]').val(), 'a1.a2', 'expected value "a1.a2"');
                     equal($('[name=prop1]:checked').val(), 'radio1val2', 'expected Radio1 Val2 to be selected');
@@ -59,15 +59,15 @@
                     data = {};
                     $('[name="a1.a2"]').val('test');
                     $('[name="a1.a3.a4"]').val('test');
-                    $('[value=radio1val1]').trigger('click');
-                    $('[value=radio2val1]').trigger('click');
+                    $('[value=radio1val2]').click();
+                    $('[value=radio2val2]').click();
                     $('[name=checkbox1]').prop('checked', true);
                     $('[name=select1]').val('val1');
                     $('form').binddata(data, {onlyGetOrSet: 'get'});
                     equal(data.a1.a2, 'test', 'expected data.a1.a2 to be "test"');
                     equal(data.a1.a3.a4, 'test', 'expected data.a1.a3.a4 to be "test"');
-                    equal(data.prop1, 'radio1val1', 'expected data.prop1 to be "radio1val1"');
-                    equal(data.radio2, 'radio2val1', 'expected data.radio2 to be "radio2val1"');
+                    equal(data.prop1, 'radio1val2', 'expected data.prop1 to be "radio1val1"');
+                    equal(data.radio2, 'radio2val2', 'expected data.radio2 to be "radio2val1"');
                     equal(data.checkbox1, true, 'expected data.checkbox1 to be true');
                     equal(data.select1, 'val1', 'expected data.select1 to be "val1"');
                     $('[name="a1.a2"]').val('new val').trigger('change');
@@ -81,6 +81,30 @@
 
                     $('[name="a1.a2"]').val('hello there').trigger('change');
                     equal(data.a1.a2, 'changed', 'expected transform to change data.a1.a2 value to "changed"');
+                });
+
+                test('Form reset', function() {
+                    stop();
+                    var data = {
+                        a1:{a2:'a1.a2'}, 
+                        prop1:'radio1val2', 
+                        checkbox1:true, 
+                        select1:'val2',
+                        birthdate: new Date('2012-10-21'),
+                        birthTime: new Date('2012-10-12T16:44'),
+                        combinedDateTime: new Date('2012-10-12T16:44')
+                    };
+                    $('form').binddata(data);
+
+                    $('form')[0].reset();
+                    setTimeout(function() {
+                        equal(data.a1.a2, '', 'expected data.a1.a2 to be ""');
+                        equal(data.prop1, undefined, 'expected data.prop1 to be ""');
+                        equal(data.checkbox1, false, 'expected data.checkbox1 to be false');
+                        equal(data.select1, 'val1', 'expected data.select1 to be "val1"');
+                        equal(data.combinedDateTime, '', 'expected data.combinedDateTime to be ""');
+                        start();
+                    }, 1);
                 });
             });
         </script>

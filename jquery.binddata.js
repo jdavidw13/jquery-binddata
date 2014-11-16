@@ -56,22 +56,37 @@
     };
 
     var changeHandler = function() {
-        var type = getElementType($(this));
-        var bean = $(this).data('bindData.data').bean;
-        var transforms = $(this).data('bindData.data').transforms;
-        var propname = $(this).attr('name');
+        var $el = $(this);
+        var type = getElementType($el);
+        var bean = $el.data('bindData.data').bean;
+        var transforms = $el.data('bindData.data').transforms;
+        var propname = $el.attr('name');
         var value = null;
         switch (type) {
             case 'checkbox':
-                value = $(this).is(':checked');
+                value = $el.is(':checked');
                 break;
             default:
-                value = $(this).val();
+                value = $el.val();
                 break;
         }
         value = applyTransforms('get', value, getTransformsForField(propname, transforms));
         setPropValue(bean, propname, value);
-        console.log(propname + ' changed: '+value);
+        console.debug(propname + ' changed: '+value);
+    };
+
+    var resetHandler = function() {
+        var form = $(this);
+        setTimeout(function() {
+            form.find('input,select').each(function(index, el) {
+                var $el = $(el);
+                var fieldValue = getFieldValue($el);
+                var bean = $(this).data('bindData.data').bean;
+                var propname = $(this).attr('name');
+                setPropValue(bean, propname, fieldValue);
+            });
+            console.debug('form reset');
+        }, 0);
     };
 
     var getTransformsForField = function(name, transforms) {
@@ -117,39 +132,40 @@
 		return value;
     }
 
+    var getFieldValue = function($el) {
+        var type = getElementType($el);
+        var val = null;
+        switch (type) {
+            case 'radio':
+                if ($el.is(':checked')) {
+                    val = $el.val();
+                }
+                else {
+                    return;
+                }
+                break;
+            case 'checkbox':
+                val = $el.is(':checked');
+                break;
+            case 'hidden':
+            case 'text':
+            case 'select':
+            case 'textarea':
+            default:
+                val = $el.val();
+        }
+        return val;
+    };
+
     var getFormFields = function($form, data, transforms) {
         var getFieldData = function(index, el) {
-            var name = $(el).attr('name');
-            var type = getElementType($(el));
-            var val = null;
-            switch (type) {
-                case 'hidden':
-                case 'text':
-                case 'select':
-                    val = $(el).val();
-                    break;
-                case 'radio':
-                    if ($(el).is(':checked')) {
-                        val = $(el).val();
-                    }
-                    else {
-                        return;
-                    }
-                    break;
-                case 'checkbox':
-                    val = $(el).is(':checked');
-                    break;
-    			case 'textarea':
-	                val = $(el).val();
-	                break;
-	            default:
-	            	val = $(el).val();
-            }
+            var $el = $(el);
+            var name = $el.attr('name');
+            var val = getFieldValue($el);
             val = applyTransforms('get', val, getTransformsForField(name, transforms));
             setPropValue(data, name, val);
         };
-        $form.find('input').each(getFieldData);
-        $form.find('select').each(getFieldData);
+        $form.find('input,select').each(getFieldData);
     };
 
     var setFormField = function($form, name, value) {
@@ -157,11 +173,6 @@
         var type = getElementType($el);
 
         switch (type) {
-            case 'hidden':
-            case 'text':
-            case 'select':
-                $el.val(value);
-                break;
             case 'radio':
                 $el.filter('[value="'+value+'"]').prop('checked', true);
                 break;
@@ -172,9 +183,6 @@
                 else {
                     $el.prop('checked', false);
                 }
-                break;
-			case 'textarea':
-                $el.val(value);
                 break;
 			case 'date':
 				var index = value.indexOf('T');
@@ -196,6 +204,10 @@
 				value = trimTrailingZ(value);
                 $el.val(value);
 				break;
+            case 'hidden':
+            case 'text':
+            case 'select':
+			case 'textarea':
             default:
                 $el.val(value);
             	
@@ -207,7 +219,6 @@
             return this;
         }
 
-        var _this = this;
         var defaultProperties = {
             bindAll: true,
             onlyGetOrSet: '',
@@ -246,6 +257,8 @@
             this.find('select').each(doBind);
             setFormFields(this, data, elData.transforms);
         }
+
+        this.on('reset', resetHandler);
 
         return this;
     };
